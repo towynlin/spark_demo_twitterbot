@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+require 'spark_demo_twitterbot'
+
+if ARGV.empty?
+  puts 'A twitter track term is required.'
+  puts 'Try something like:'
+  puts "  ./bin/spark_demo_twitterbot '#hellospark'"
+  exit 1
+else
+  track_term = ARGV[0]
+end
+
+EM.run do
+  SparkDemoTwitterbot::TwitterStream.new(track_term) do |tweet|
+    puts tweet['text']
+    puts "tweeter has #{tweet['user']['followers_count']} followers"
+    if tweet['retweeted_status']
+      puts 'this is a retweet'
+      puts 'original tweeter has ' +
+        "#{tweet['retweeted_status']['user']['followers_count']} followers"
+    end
+    puts
+  end
+end

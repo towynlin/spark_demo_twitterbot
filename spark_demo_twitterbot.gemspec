@@ -7,13 +7,18 @@ Gem::Specification.new do |gem|
   gem.name          = "spark_demo_twitterbot"
   gem.version       = SparkDemoTwitterbot::VERSION
   gem.authors       = ["Zachary Crockett"]
-  gem.email         = ["towynlin@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.email         = ["zachary@sparkdevices.com"]
+  gem.description   = %q{App to demo controlling lights from a twitter stream using sparkdevices.com}
+  gem.summary       = %q{Spark Devices twitter bot demo}
+  gem.homepage      = "http://www.sparkdevices.com/"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
+
+  gem.add_runtime_dependency 'em-http-request'
+  gem.add_runtime_dependency 'simple_oauth'
+
+  gem.add_development_dependency 'rspec'
 end
