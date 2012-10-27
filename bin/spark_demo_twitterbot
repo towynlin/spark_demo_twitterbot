@@ -13,13 +13,12 @@ end
 
 EM.run do
   SparkDemoTwitterbot::TwitterStream.new(track_term) do |tweet|
-    puts tweet['text']
-    puts "tweeter has #{tweet['user']['followers_count']} followers"
+    followers_count = tweet['user']['followers_count']
+    log_message = "followers: #{followers_count}"
     if tweet['retweeted_status']
-      puts 'this is a retweet'
-      puts 'original tweeter has ' +
-        "#{tweet['retweeted_status']['user']['followers_count']} followers"
+      rt_followers_count = tweet['retweeted_status']['user']['followers_count']
+      log_message << ", retweet original followers: #{rt_followers_count}"
     end
-    puts
+    puts log_message
   end
 end
