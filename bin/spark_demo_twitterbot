@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+$stdout.sync = true
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'spark_demo_twitterbot'
 
@@ -15,13 +16,15 @@ EM.run do
   # bind to a port to satisfy heroku
   EM.start_server '0.0.0.0', ENV['PORT'], SparkDemoTwitterbot::DummyServer
 
+  spark_device = SparkDemoTwitterbot::SparkDevice.new ENV['SPARK_DEVICE_ID']
+
   SparkDemoTwitterbot::TwitterStream.new(track_term) do |tweet|
-    followers_count = tweet['user']['followers_count']
-    log_message = "followers: #{followers_count}"
     if tweet['retweeted_status']
-      rt_followers_count = tweet['retweeted_status']['user']['followers_count']
-      log_message << ", retweet original followers: #{rt_followers_count}"
+      followers_count = tweet['user']['followers_count'] +
+                        tweet['retweeted_status']['user']['followers_count']
+      spark_device.handle_retweet followers_count
+    else
+      spark_device.handle_tweet tweet['user']['followers_count']
     end
-    puts log_message
   end
 end
