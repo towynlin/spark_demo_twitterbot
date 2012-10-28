@@ -11,11 +11,10 @@ else
   track_term = ARGV[0]
 end
 
-# just bind to the port to satisfy heroku
-require 'socket'
-TCPServer.new ENV['PORT']
-
 EM.run do
+  # bind to a port to satisfy heroku
+  EM.start_server '0.0.0.0', ENV['PORT'], SparkDemoTwitterbot::DummyServer
+
   SparkDemoTwitterbot::TwitterStream.new(track_term) do |tweet|
     followers_count = tweet['user']['followers_count']
     log_message = "followers: #{followers_count}"
