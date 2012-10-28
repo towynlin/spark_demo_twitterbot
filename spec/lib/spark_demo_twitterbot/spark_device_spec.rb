@@ -3,6 +3,11 @@ require 'spark_demo_twitterbot/spark_device'
 describe SparkDemoTwitterbot::SparkDevice do
   subject { SparkDemoTwitterbot::SparkDevice.new('foo') }
 
+  before :each do
+    # don't actually sleep during tests
+    subject.stub(:sleep)
+  end
+
   it 'is initialized with a device id' do
     expect(subject).to be_a SparkDemoTwitterbot::SparkDevice
   end
@@ -15,8 +20,14 @@ describe SparkDemoTwitterbot::SparkDevice do
   it 'responds to brighten' do
     expect(subject).to respond_to :brighten
   end
-  it 'reponds to blink' do
+  it 'responds to blink' do
     expect(subject).to respond_to :blink
+  end
+  it 'responds to fade' do
+    expect(subject).to respond_to :fade
+  end
+  it 'responds to current_level' do
+    expect(subject).to respond_to :current_level
   end
 
   context '#handle_tweet' do
@@ -58,8 +69,40 @@ describe SparkDemoTwitterbot::SparkDevice do
   end
 
   context '#brighten' do
+    it 'checks the current level, fades up quickly, then down slowly' do
+      subject.should_receive(:current_level).once.and_return(2)
+      subject.should_receive(:fade).twice
+      subject.brighten(1)
+    end
+    it 'does nothing for magnitude 0' do
+      subject.should_not_receive(:current_level)
+      subject.should_not_receive(:fade)
+      subject.brighten(0)
+    end
   end
 
   context '#blink' do
+    it 'checks the current level, and fades quickly up, down, up' do
+      subject.should_receive(:current_level).once.and_return(2)
+      subject.should_receive(:fade).exactly(4).times
+      subject.blink(1)
+    end
+    it 'does nothing for magnitude 0' do
+      subject.should_not_receive(:current_level)
+      subject.should_not_receive(:fade)
+      subject.blink(0)
+    end
+  end
+
+  context '#fade' do
+  end
+
+  context '#current_level' do
+    it 'should return an integer 0-12' do
+      level = subject.current_level
+      expect(level).to be_a Fixnum
+      expect(level).to be >= 0
+      expect(level).to be <= 12
+    end
   end
 end
