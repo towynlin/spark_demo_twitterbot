@@ -58,14 +58,14 @@ module SparkDemoTwitterbot
       target = validated_target(target)
       duration_seconds = validated_duration(duration_seconds)
       duration_ms = (1000 * duration_seconds).to_i
-      path = "/devices/#{@device_id}/fade/#{target}/#{duration_ms}"
+      path = "/device/#{@device_id}/fade/#{target}/#{duration_ms}"
       client = @connection.post path: path
       client.errback { puts "fade #{target} #{duration_ms} failed for #{@device_id}" }
       client.callback { puts "fade #{target} #{duration_ms} succeeded for #{@device_id}" }
     end
 
     def current_level(&block)
-      path = "/devices/#{@device_id}/getStatus"
+      path = "/device/#{@device_id}"
       client = @connection.get path: path
       client.errback { puts "getStatus failed for #{@device_id}" }
       client.callback do
@@ -90,18 +90,18 @@ module SparkDemoTwitterbot
       target = 12 if 12 < target
       target
     end
-  end
 
-  def validated_duration(duration_seconds)
-    unless duration_seconds.is_a? Numeric
-      if duration_seconds.respond_to? :to_f
-        duration_seconds = duration_seconds.to_f
-      else
-        raise TypeError.new "can't convert #{duration_seconds.class} into Numeric"
+    def validated_duration(duration_seconds)
+      unless duration_seconds.is_a? Numeric
+        if duration_seconds.respond_to? :to_f
+          duration_seconds = duration_seconds.to_f
+        else
+          raise TypeError.new "can't convert #{duration_seconds.class} into Numeric"
+        end
       end
+      duration_seconds = 0 if 0 > duration_seconds
+      duration_seconds = 600 if 600 < duration_seconds
+      duration_seconds
     end
-    duration_seconds = 0 if 0 > duration_seconds
-    duration_seconds = 600 if 600 < duration_seconds
-    duration_seconds
   end
 end
