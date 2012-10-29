@@ -59,7 +59,7 @@ module SparkDemoTwitterbot
       duration_seconds = validated_duration(duration_seconds)
       duration_ms = (1000 * duration_seconds).to_i
       path = "/device/#{@device_id}/fade/#{target}/#{duration_ms}"
-      client = @connection.post path: path
+      client = @connection.put path: path
       client.errback { puts "fade #{target} #{duration_ms} failed for #{@device_id}" }
       client.callback { puts "fade #{target} #{duration_ms} succeeded for #{@device_id}" }
     end
