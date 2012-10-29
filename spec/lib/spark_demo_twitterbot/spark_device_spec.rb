@@ -71,25 +71,21 @@ describe SparkDemoTwitterbot::SparkDevice do
   context '#brighten' do
     it 'checks the current level, fades up quickly, then down slowly' do
       subject.should_receive(:current_level).once.and_return(2)
-      subject.should_receive(:fade).twice
       subject.brighten(1)
     end
     it 'does nothing for magnitude 0' do
       subject.should_not_receive(:current_level)
-      subject.should_not_receive(:fade)
       subject.brighten(0)
     end
   end
 
   context '#blink' do
-    it 'checks the current level, and fades quickly up, down, up' do
+    it 'checks the current level, and fades quickly up, down, up, then down slowly' do
       subject.should_receive(:current_level).once.and_return(2)
-      subject.should_receive(:fade).exactly(4).times
       subject.blink(1)
     end
     it 'does nothing for magnitude 0' do
       subject.should_not_receive(:current_level)
-      subject.should_not_receive(:fade)
       subject.blink(0)
     end
   end
@@ -98,11 +94,5 @@ describe SparkDemoTwitterbot::SparkDevice do
   end
 
   context '#current_level' do
-    it 'should return an integer 0-12' do
-      level = subject.current_level
-      expect(level).to be_a Fixnum
-      expect(level).to be >= 0
-      expect(level).to be <= 12
-    end
   end
 end

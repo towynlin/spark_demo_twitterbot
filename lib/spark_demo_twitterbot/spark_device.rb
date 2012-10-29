@@ -1,7 +1,10 @@
+require 'em-http'
+
 module SparkDemoTwitterbot
   class SparkDevice
     def initialize(device_id)
       @device_id = device_id
+      @connection = EM::HttpRequest.new ENV['SPARK_API_PROTO_HOST']
       @last_fall_duration = 0
       @last_fall_time = Time.now
     end
@@ -20,46 +23,59 @@ module SparkDemoTwitterbot
 
     def brighten(magnitude)
       return if 1 > magnitude
-      puts "brighten #{magnitude}"
-      level = current_level + magnitude
-      duration_seconds = magnitude * 0.1
-      fade level, duration_seconds
-      sleep duration_seconds
-      @last_fall_duration = level * 30
-      @last_fall_time = Time.now
-      fade 0, @last_fall_duration
+      current_level do |level|
+        level += magnitude
+        duration_seconds = magnitude * 0.1
+        fade level, duration_seconds
+        sleep duration_seconds
+        @last_fall_duration = level * 30
+        @last_fall_time = Time.now
+        fade 0, @last_fall_duration
+      end
     end
 
     def blink(magnitude)
       return if 1 > magnitude
-      puts "blink #{magnitude}"
-      level = current_level
-      fade level + magnitude, 0.3
-      sleep 0.3
-      fade level - magnitude, 0.3
-      sleep 0.3
-      level += magnitude / 3
-      fade level, 0.3
-      sleep 0.3
-      seconds_remaining = @last_fall_time + @last_fall_duration - Time.now
-      @last_fall_duration = level * 30
-      if 0 < seconds_remaining
-        @last_fall_duration += seconds_remaining
+      current_level do |level|
+        fade level + magnitude, 0.3
+        sleep 0.3
+        fade level - magnitude, 0.3
+        sleep 0.3
+        level += magnitude / 3
+        fade level, 0.3
+        sleep 0.3
+        seconds_remaining = @last_fall_time + @last_fall_duration - Time.now
+        @last_fall_duration = level * 30
+        if 0 < seconds_remaining
+          @last_fall_duration += seconds_remaining
+        end
+        @last_fall_time = Time.now
+        fade 0, @last_fall_duration
       end
-      @last_fall_time = Time.now
-      fade 0, @last_fall_duration
     end
 
     def fade(target, duration_seconds)
       target = validated_target(target)
       duration_seconds = validated_duration(duration_seconds)
       duration_ms = (1000 * duration_seconds).to_i
-      resource = "#{ENV['SPARK_API_PROTO_HOST']}/devices/#{@device_id}/fade/#{target}/#{duration_ms}"
+      path = "/devices/#{@device_id}/fade/#{target}/#{duration_ms}"
+      client = @connection.post path: path
+      client.errback { puts "fade #{target} #{duration_ms} failed for #{@device_id}" }
+      client.callback { puts "fade #{target} #{duration_ms} succeeded for #{@device_id}" }
     end
 
-    def current_level
-      resource = "#{ENV['SPARK_API_PROTO_HOST']}/devices/#{@device_id}/getStatus"
-      5
+    def current_level(&block)
+      path = "/devices/#{@device_id}/getStatus"
+      client = @connection.get path: path
+      client.errback { puts "getStatus failed for #{@device_id}" }
+      client.callback do
+        puts "getStatus succeeded for #{@device_id}: #{client.response}"
+        response = JSON.parse client.response
+        level = response['dimval'].to_i
+        # device currently responds with 0-255, will change to 0-12
+        level = 0.05 * level - 1.0
+        block.call level.round
+      end
     end
 
     def validated_target(target)

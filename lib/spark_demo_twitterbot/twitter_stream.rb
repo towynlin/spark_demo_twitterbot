@@ -35,6 +35,13 @@ module SparkDemoTwitterbot
 
     def callback(client)
       puts 'connection closed'
+      if 401 == client.response_header.status
+        puts '   *** 401 Unauthorized ***'
+        puts '   *** You need to set the OAUTH environment vars correctly.'
+      else
+        puts 'buffer contents:'
+        puts @buffer
+      end
       EM.stop # or, actually, reconnect
     end
 
