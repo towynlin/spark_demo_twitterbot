@@ -35,16 +35,16 @@ describe SparkDemoTwitterbot::SparkDevice do
       subject.should_not_receive(:brighten)
       subject.handle_tweet(7)
     end
-    it 'brightens the light by 1 if the user has 16 followers' do
-      subject.should_receive(:brighten).with(1)
+    it 'brightens the light by 2 if the user has 16 followers' do
+      subject.should_receive(:brighten).with(2)
       subject.handle_tweet(16)
     end
-    it 'brightens the light by 2 if the user has 32 followers' do
-      subject.should_receive(:brighten).with(2)
+    it 'brightens the light by 3 if the user has 32 followers' do
+      subject.should_receive(:brighten).with(3)
       subject.handle_tweet(32)
     end
-    it 'brightens the light by 3 if the user has 64 followers' do
-      subject.should_receive(:brighten).with(3)
+    it 'brightens the light by 4 if the user has 64 followers' do
+      subject.should_receive(:brighten).with(4)
       subject.handle_tweet(64)
     end
   end
@@ -68,12 +68,34 @@ describe SparkDemoTwitterbot::SparkDevice do
     end
   end
 
+  context '#should_ignore?' do
+    context 'less than a second ago' do
+      it 'is true for magnitude 2' do
+        expect(subject.should_ignore?(2)).to be_true
+      end
+    end
+    context 'more than a second ago' do
+      before :all do
+        @device_having_waited = subject
+        sleep 1.1
+      end
+      it 'is true for magnitude 0' do
+        expect(@device_having_waited.should_ignore?(0)).to be_true
+      end
+      it 'is false for magnitude 2' do
+        expect(@device_having_waited.should_ignore?(2)).to be_false
+      end
+    end
+  end
+
   context '#brighten' do
     it 'checks the current level, fades up quickly, then down slowly' do
+      subject.should_receive(:should_ignore?).once.and_return(false)
       subject.should_receive(:current_level).once.and_return(2)
       subject.brighten(1)
     end
     it 'does nothing for magnitude 0' do
+      subject.should_receive(:should_ignore?).once.and_return(true)
       subject.should_not_receive(:current_level)
       subject.brighten(0)
     end
@@ -81,6 +103,7 @@ describe SparkDemoTwitterbot::SparkDevice do
 
   context '#blink' do
     it 'checks the current level, and fades quickly up, down, up, then down slowly' do
+      subject.should_receive(:should_ignore?).once.and_return(false)
       subject.should_receive(:current_level).once.and_return(2)
       subject.blink(1)
     end

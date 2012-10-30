@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    spark_demo_twitterbot (0.0.1)
+    spark_demo_twitterbot (0.0.2)
       em-http-request
       simple_oauth
 
