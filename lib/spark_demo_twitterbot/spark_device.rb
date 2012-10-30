@@ -10,7 +10,7 @@ module SparkDemoTwitterbot
 
     def handle_tweet(followers_count)
       return if 16 > followers_count
-      magnitude = Math.log2(followers_count / 8)
+      magnitude = Math.log2(followers_count / 4)
       brighten(magnitude.round)
     end
 
@@ -27,7 +27,7 @@ module SparkDemoTwitterbot
         duration_seconds = magnitude * 0.1
         fade level, duration_seconds
         sleep duration_seconds
-        @last_fall_duration = level * 30
+        @last_fall_duration = level * 2
         @last_fall_time = Time.now
         fade 0, @last_fall_duration
       end
@@ -71,11 +71,13 @@ module SparkDemoTwitterbot
       client.errback { puts "getStatus failed for #{@device_id}" }
       client.callback do
         puts "getStatus succeeded for #{@device_id}: #{client.response}"
-        response = JSON.parse client.response
-        level = response['dimval'].to_i
-        # device currently responds with 0-255, will change to 0-12
-        level = 0.05 * level - 1.0
-        block.call level.round
+        unless "No device connected with ID #{@device_id}." == client.response
+          response = JSON.parse client.response
+          level = response['dimval'].to_i
+          # device currently responds with 0-255, will change to 0-12
+          level = 0.05 * level - 1.0
+          block.call level.round
+        end
       end
     end
 
