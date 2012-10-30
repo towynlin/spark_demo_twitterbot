@@ -4,7 +4,6 @@ module SparkDemoTwitterbot
   class SparkDevice
     def initialize(device_id)
       @device_id = device_id
-      @connection = EM::HttpRequest.new ENV['SPARK_API_PROTO_HOST']
       @last_fall_duration = 0
       @last_fall_time = Time.now
     end
@@ -58,15 +57,17 @@ module SparkDemoTwitterbot
       target = validated_target(target)
       duration_seconds = validated_duration(duration_seconds)
       duration_ms = (1000 * duration_seconds).to_i
+      connection = EM::HttpRequest.new ENV['SPARK_API_PROTO_HOST']
       path = "/device/#{@device_id}/fade/#{target}/#{duration_ms}"
-      client = @connection.put path: path
+      client = connection.put path: path
       client.errback { puts "fade #{target} #{duration_ms} failed for #{@device_id}" }
       client.callback { puts "fade #{target} #{duration_ms} succeeded for #{@device_id}" }
     end
 
     def current_level(&block)
+      connection = EM::HttpRequest.new ENV['SPARK_API_PROTO_HOST']
       path = "/device/#{@device_id}"
-      client = @connection.get path: path
+      client = connection.get path: path
       client.errback { puts "getStatus failed for #{@device_id}" }
       client.callback do
         puts "getStatus succeeded for #{@device_id}: #{client.response}"
