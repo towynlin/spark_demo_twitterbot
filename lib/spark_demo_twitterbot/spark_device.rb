@@ -20,26 +20,37 @@ module SparkDemoTwitterbot
       blink(magnitude.round)
     end
 
+    def should_ignore?(magnitude)
+      1 > magnitude or (Time.now - @last_fall_time) < 1
+    end
+
     def brighten(magnitude)
-      return if 1 > magnitude
+      return if should_ignore? magnitude
       current_level do |level|
         level += magnitude
         duration_seconds = magnitude * 0.1
         fade level, duration_seconds
         sleep duration_seconds
-        @last_fall_duration = level * 2
+        @last_fall_duration = level * 1
         @last_fall_time = Time.now
         fade 0, @last_fall_duration
       end
     end
 
     def blink(magnitude)
-      return if 1 > magnitude
+      return if should_ignore? magnitude
       current_level do |level|
-        fade level + magnitude, 0.3
-        sleep 0.3
-        fade level - magnitude, 0.3
-        sleep 0.3
+        if 6 < level
+          fade level - magnitude, 0.3
+          sleep 0.3
+          fade level + magnitude, 0.3
+          sleep 0.3
+        else
+          fade level + magnitude, 0.3
+          sleep 0.3
+          fade level - magnitude, 0.3
+          sleep 0.3
+        end
         level += magnitude / 3
         fade level, 0.3
         sleep 0.3

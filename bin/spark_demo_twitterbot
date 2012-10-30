@@ -19,6 +19,7 @@ EM.run do
   spark_device = SparkDemoTwitterbot::SparkDevice.new ENV['SPARK_DEVICE_ID']
 
   SparkDemoTwitterbot::TwitterStream.new(track_term) do |tweet|
+    puts tweet['text']
     if tweet['retweeted_status']
       followers_count = tweet['user']['followers_count'] +
                         tweet['retweeted_status']['user']['followers_count']
