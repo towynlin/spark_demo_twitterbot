@@ -13,15 +13,19 @@ module SparkDemoTwitterbot
     }
 
     def initialize(track_term)
-      @request_options = { query: { q: track_term, count: 10 },
-                           head: { 'accept-encoding' => 'gzip' } }
+      @track_term = track_term
+      @last_id = 1
+      @request_options_lambda = -> do
+        { query: { q: @track_term, since_id: @last_id, count: 5 },
+          head: { 'accept-encoding' => 'gzip' } }
+      end
     end
 
     def get(&tweet_handler)
       @tweet_handler = tweet_handler
       connection = EM::HttpRequest.new ENDPOINT
       connection.use EM::Middleware::OAuth, OAUTH_CONFIG
-      client = connection.get @request_options
+      client = connection.get @request_options_lambda.call
       client.callback &method(:callback)
       client.errback &method(:errback)
     end
@@ -36,8 +40,12 @@ module SparkDemoTwitterbot
     end
 
     def errback(client)
-      puts 'fail'
+      puts '   *** fail ***'
       EM.stop # find out why, back off, reconnect
+    end
+
+    def last_id=(tweet_id)
+      @last_id = tweet_id if tweet_id > @last_id
     end
   end
 end
