@@ -15,9 +15,9 @@ end
 EM.run do
   spark_device = SparkDemoTwitterbot::SparkDevice.new ENV['SPARK_DEVICE_ID']
   twitter_search = SparkDemoTwitterbot::TwitterSearch.new(track_term)
-  EM.add_periodic_timer(5) do
+  EM.add_periodic_timer(5.5) do
     twitter_search.get do |results|
-      unless results['statuses'].empty?
+      if results['statuses']
         results['statuses'].each_with_index do |tweet, index|
           EM.add_timer(index) do
             twitter_search.last_id = tweet['id']
@@ -32,6 +32,9 @@ EM.run do
             end
           end
         end
+      else
+        puts ' *** no tweets in response... so what was the response? ***'
+        puts " *** #{results.inspect}"
       end
     end
   end
