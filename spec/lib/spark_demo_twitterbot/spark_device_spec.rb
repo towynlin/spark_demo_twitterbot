@@ -114,6 +114,19 @@ describe SparkDemoTwitterbot::SparkDevice do
   end
 
   context '#fade' do
+    before :each do
+      client = double('client').as_null_object
+      client.should_receive(:callback).and_yield
+      EM::HttpRequest.stub_chain(:new, :put).and_return(client)
+    end
+    it 'calls a given block' do
+      @called = false
+      subject.fade(0, 1) { @called = true }
+      expect(@called).to be_true
+    end
+    it 'is ok not to pass a block' do
+      expect(subject.fade(0, 1)).not_to raise_error
+    end
   end
 
   context '#current_level' do
