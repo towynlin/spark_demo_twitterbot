@@ -1,1 +1,1 @@
-web: bundle exec ruby bin/spark_demo_twitterbot '#hellospark'
+web: bundle exec ruby bin/spark_demo_twitterbot stream '#hellospark'

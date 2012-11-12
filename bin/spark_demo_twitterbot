@@ -3,39 +3,46 @@ $stdout.sync = true
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'spark_demo_twitterbot'
 
-if ARGV.empty?
-  puts 'A twitter track term is required.'
+if 2 > ARGV.size
+  puts 'A twitter endpoint type (stream/search) and track term are required.'
   puts 'Try something like:'
-  puts "  ./bin/spark_demo_twitterbot '#hellospark'"
+  puts "  ./bin/spark_demo_twitterbot stream '#hellospark'"
   exit 1
 else
-  track_term = ARGV[0]
+  endpoint_type = ARGV[0]
+  track_term = ARGV[1]
 end
 
 EM.run do
   spark_device = SparkDemoTwitterbot::SparkDevice.new ENV['SPARK_DEVICE_ID']
-  twitter_search = SparkDemoTwitterbot::TwitterSearch.new(track_term)
-  EM.add_periodic_timer(5.5) do
-    twitter_search.get do |results|
-      if results['statuses']
-        results['statuses'].each_with_index do |tweet, index|
-          EM.add_timer(index) do
-            twitter_search.last_id = tweet['id']
-            if tweet['retweeted_status']
-              puts '--RT--> ' + tweet['text']
-              followers_count = tweet['user']['followers_count'] +
-                                tweet['retweeted_status']['user']['followers_count']
-              spark_device.handle_retweet followers_count
-            else
-              puts tweet['text']
-              spark_device.handle_tweet tweet['user']['followers_count']
+
+  if 'stream' == endpoint_type
+
+    twitter_stream = SparkDemoTwitterbot::TwitterStream.new track_term do |tweet|
+      spark_device.pick_handler_for tweet
+    end
+
+  elsif 'search' == endpoint_type
+
+    twitter_search = SparkDemoTwitterbot::TwitterSearch.new track_term
+    EM.add_periodic_timer 5.5 do
+      twitter_search.get do |results|
+        if results['statuses']
+          results['statuses'].each_with_index do |tweet, index|
+            EM.add_timer(index) do
+              twitter_search.last_id = tweet['id']
+              spark_device.pick_handler_for tweet
             end
           end
+        else
+          puts ' *** no tweets in response... so what was the response? ***'
+          puts " *** #{results.inspect}"
         end
-      else
-        puts ' *** no tweets in response... so what was the response? ***'
-        puts " *** #{results.inspect}"
       end
     end
+
+  else
+    puts 'The only allowed enpoint types are stream and search.'
   end
+
 end

@@ -8,6 +8,18 @@ module SparkDemoTwitterbot
       @last_fall_time = Time.now
     end
 
+    def pick_handler_for(tweet)
+      if tweet['retweeted_status']
+        puts '--RT--> ' + tweet['text']
+        followers_count = tweet['user']['followers_count'] +
+                          tweet['retweeted_status']['user']['followers_count']
+        handle_retweet followers_count
+      else
+        puts tweet['text']
+        handle_tweet tweet['user']['followers_count']
+      end
+    end
+
     def handle_tweet(followers_count)
       return if 16 > followers_count
       magnitude = Math.log2(followers_count / 4)

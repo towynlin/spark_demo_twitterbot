@@ -17,8 +17,7 @@ module SparkDemoTwitterbot
       connection = EM::HttpRequest.new ENDPOINT, { inactivity_timeout: 90 }
       connection.use EM::Middleware::OAuth, OAUTH_CONFIG
       request_options = { body: { track: track_term },
-                          keepalive: true,
-                          head: { 'accept-encoding' => 'gzip' } }
+                          keepalive: true }
       client = connection.post request_options
       client.stream &method(:stream)
       client.callback &method(:callback)
