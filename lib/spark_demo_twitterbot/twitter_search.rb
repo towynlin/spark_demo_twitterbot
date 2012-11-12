@@ -16,8 +16,7 @@ module SparkDemoTwitterbot
       @track_term = track_term
       @last_id = 1
       @request_options_lambda = -> do
-        { query: { q: @track_term, since_id: @last_id, count: 5 },
-          head: { 'accept-encoding' => 'gzip' } }
+        { query: { q: @track_term, since_id: @last_id, count: 5 } }
       end
     end
 
@@ -41,7 +40,8 @@ module SparkDemoTwitterbot
 
     def errback(client)
       puts '   *** fail ***'
-      EM.stop # find out why, back off, reconnect
+      puts "   *** #{client.response_header.inspect}"
+      # find out why, back off, reconnect
     end
 
     def last_id=(tweet_id)
