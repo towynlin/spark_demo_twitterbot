@@ -31,40 +31,40 @@ describe SparkDemoTwitterbot::SparkDevice do
   end
 
   context '#handle_tweet' do
-    it 'does nothing if the user has 7 followers' do
-      subject.should_not_receive(:brighten)
-      subject.handle_tweet(7)
+    it 'brightens the light by 3 if the user has 0 followers' do
+      subject.should_receive(:brighten).with(3)
+      subject.handle_tweet(0)
     end
-    it 'brightens the light by 2 if the user has 16 followers' do
-      subject.should_receive(:brighten).with(2)
+    it 'brightens the light by 4 if the user has 16 followers' do
+      subject.should_receive(:brighten).with(4)
       subject.handle_tweet(16)
     end
-    it 'brightens the light by 3 if the user has 32 followers' do
-      subject.should_receive(:brighten).with(3)
+    it 'brightens the light by 5 if the user has 32 followers' do
+      subject.should_receive(:brighten).with(5)
       subject.handle_tweet(32)
     end
-    it 'brightens the light by 4 if the user has 64 followers' do
-      subject.should_receive(:brighten).with(4)
+    it 'brightens the light by 6 if the user has 64 followers' do
+      subject.should_receive(:brighten).with(6)
       subject.handle_tweet(64)
     end
   end
 
   context '#handle_retweet' do
-    it 'does nothing if the total number of followers is 49' do
-      subject.should_not_receive(:blink)
-      subject.handle_retweet(49)
-    end
-    it 'blinks the light by 1 if the total number of followers is 100' do
-      subject.should_receive(:blink).with(1)
-      subject.handle_retweet(100)
-    end
-    it 'blinks the light by 2 if the total number of followers is 200' do
-      subject.should_receive(:blink).with(2)
-      subject.handle_retweet(200)
-    end
-    it 'blinks the light by 3 if the total number of followers is 400' do
+    it 'blinks the light by 3 if the total number of followers is 0' do
       subject.should_receive(:blink).with(3)
-      subject.handle_retweet(400)
+      subject.handle_retweet(0)
+    end
+    it 'blinks the light by 3 if the total number of followers is 40' do
+      subject.should_receive(:blink).with(3)
+      subject.handle_retweet(40)
+    end
+    it 'blinks the light by 4 if the total number of followers is 80' do
+      subject.should_receive(:blink).with(4)
+      subject.handle_retweet(80)
+    end
+    it 'blinks the light by 5 if the total number of followers is 160' do
+      subject.should_receive(:blink).with(5)
+      subject.handle_retweet(160)
     end
   end
 

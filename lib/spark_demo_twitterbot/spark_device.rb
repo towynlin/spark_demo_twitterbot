@@ -21,14 +21,14 @@ module SparkDemoTwitterbot
     end
 
     def handle_tweet(followers_count)
-      return if 16 > followers_count
-      magnitude = Math.log2(followers_count / 4)
+      magnitude = Math.log2(followers_count)
+      magnitude = 3 if 3 > magnitude
       brighten(magnitude.round)
     end
 
     def handle_retweet(followers_count)
-      return if 100 > followers_count
-      magnitude = Math.log2(followers_count / 50)
+      magnitude = Math.log2(followers_count / 5)
+      magnitude = 3 if 3 > magnitude
       blink(magnitude.round)
     end
 
