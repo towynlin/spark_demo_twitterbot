@@ -19,9 +19,14 @@ module SparkDemoTwitterbot
       request_options = { body: { track: track_term },
                           keepalive: true }
       client = connection.post request_options
+      client.headers &method(:headers)
       client.stream &method(:stream)
       client.callback &method(:callback)
       client.errback &method(:errback)
+    end
+
+    def headers(headers)
+      puts "   *** headers: #{headers.inspect}"
     end
 
     def stream(chunk)
