@@ -79,7 +79,7 @@ module SparkDemoTwitterbot
       duration_seconds = validated_duration(duration_seconds)
       duration_ms = (1000 * duration_seconds).to_i
       connection = EM::HttpRequest.new ENV['SPARK_API_PROTO_HOST']
-      path = "/device/#{@device_id}/fade/#{target}/#{duration_ms}"
+      path = "/device/#{@device_id}/fade/#{target}/#{duration_ms}?#{api_key}"
       client = connection.put path: path
       client.errback { puts "fade #{target} #{duration_ms} failed for #{@device_id}" }
       client.callback do
@@ -90,7 +90,7 @@ module SparkDemoTwitterbot
 
     def current_level(&block)
       connection = EM::HttpRequest.new ENV['SPARK_API_PROTO_HOST']
-      path = "/device/#{@device_id}"
+      path = "/device/#{@device_id}?#{api_key}"
       client = connection.get path: path
       client.errback { puts "getStatus failed for #{@device_id}" }
       client.callback do
@@ -129,6 +129,10 @@ module SparkDemoTwitterbot
       duration_seconds = 0 if 0 > duration_seconds
       duration_seconds = 600 if 600 < duration_seconds
       duration_seconds
+    end
+
+    def api_key
+      "api_key=#{ENV['SPARK_API_KEY']}"
     end
   end
 end
